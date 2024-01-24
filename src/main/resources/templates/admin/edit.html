@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit user</title>
+
+</head>
+<body>
+
+<form th:method="PATCH" th:action="@{/admin/edit/{id}(id = ${editUser.getId()})}" th:object="${editUser}">
+    <br>
+    <label for="username">Введите имя</label>
+    <input type="text" th:field="*{username}" id="username">
+    <div style="color: red" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+    <br>
+    <label for="lastName">Введите фамилию</label>
+    <input type="text" th:field="*{lastName}" id="lastName">
+    <div style="color: red" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+    <br>
+    <label for="age">Введите возраст</label>
+    <input type="text" th:field="*{age}" id="age">
+    <div style="color: red" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></div>
+    <br>
+    <label for="email">Введите почту</label>
+    <input type="text" th:field="*{email}" id="email">
+    <div style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    <br>
+    <label>Роль:
+        <input type="checkbox" name="roles"
+               th:each="role : ${roles}"
+               th:text="${role.getName()}"
+               th:value="${role.getId()}"
+               th:field="*{roles}">
+    </label>
+    <br>
+    <label for="password">Введите пароль</label>
+    <input type="password" th:field="*{password}" id="password">
+    <div style="color: red" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">password error</div>
+    <br>
+
+    <input type="submit" value="Изменить">
+</form>
+
+</body>
+</html>

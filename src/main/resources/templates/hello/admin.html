@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>ADMIN</title>
+</head>
+<body>
+
+<h1>Добропожаловать администратор!</h1>
+
+<table border="2" style="width: 400px">
+    <thead>
+    <tr>
+        <th scope="col">id</th>
+        <th scope="col">Имя</th>
+        <th scope="col">фамилия</th>
+        <th scope="col">возраст</th>
+        <th scope="col">почта</th>
+        <th scope="col">роль</th>
+        <th scope="col">зашифрованный пароль</th>
+        <th scope="col">изменить</th>
+        <th scope="col">удалить</th>
+    </tr>
+    </thead>
+    <tbody>
+
+
+    <tr th:each="user : ${user}">
+        <td th:text="${user.getId()}"></td>
+        <td th:text="${user.getUsername()}"></td>
+        <td th:text="${user.getLastName()}"></td>
+        <td th:text="${user.getAge()}"></td>
+        <td th:text="${user.getEmail()}"></td>
+        <td th:text="${user.getRoles()}"></td>
+        <td th:text="${user.getPassword()}"></td>
+        <td>
+            <form th:action="@{/admin/edit/{id}(id = ${user.getId()})}" th:method="GET">
+                <button type="submit">Изменить</button>
+            </form>
+        </td>
+        <td>
+            <form th:action="@{/admin/delete/{id}(id = ${user.getId()})}" th:method="DELETE">
+                <button type="submit">Удалить</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<br><br>
+<button onclick="location.href='/admin/add'">Добавить пользователя</button>
+<br><br>
+<form th:action="@{/logout}" th:method="POST">
+    <input class="logout-btn" type="submit" value="Выйти">
+</form>
+</body>
+</html>
