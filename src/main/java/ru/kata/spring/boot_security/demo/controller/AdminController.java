@@ -1,4 +1,4 @@
-package ru.kata.spring.boot_security.demo.controllers;
+package ru.kata.spring.boot_security.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.services.UserService;
-import ru.kata.spring.boot_security.demo.services.RoleService;
+import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.UserService;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.util.UserValidator;
 
 import javax.validation.Valid;
@@ -51,7 +51,10 @@ public class AdminController {
     @PatchMapping("/edit/{id}")
     public String update(@PathVariable("id") int id, @ModelAttribute("editUser") @Valid User updateUser, BindingResult bindingResult,
                          @RequestParam(value = "roles", required = false) Set<Integer> roleIds) {
-
+        User user = userService.getUserById(id);
+        if (!user.getUsername().equals(updateUser.getUsername())) {
+            userValidator.validate(updateUser, bindingResult);
+        }
         if (bindingResult.hasErrors())
             return "/admin/edit";
 

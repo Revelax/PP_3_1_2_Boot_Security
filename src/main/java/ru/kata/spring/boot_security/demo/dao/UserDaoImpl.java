@@ -1,11 +1,14 @@
 package ru.kata.spring.boot_security.demo.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
-import ru.kata.spring.boot_security.demo.models.Role;
-import ru.kata.spring.boot_security.demo.models.User;
-import ru.kata.spring.boot_security.demo.services.RoleService;
+import ru.kata.spring.boot_security.demo.model.Role;
+import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -14,19 +17,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static ru.kata.spring.boot_security.demo.configs.WebSecurityConfig.passwordEncoder;
-
 @Repository
 public class UserDaoImpl implements UserDao {
 
     private final RoleService roleService;
-
-    public UserDaoImpl(RoleService roleService) {
-        this.roleService = roleService;
-    }
-
+    private final PasswordEncoder passwordEncoder;
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    public UserDaoImpl(RoleService roleService, PasswordEncoder passwordEncoder) {
+        this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
+    }
+
 
     @Override
     public boolean isTableUsersEmpty() {
@@ -37,7 +40,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        return entityManager.createQuery("SELECT u FROM User u", User.class).getResultList();
+        return entityManager.createQuery("SELECT u FROM User u ", User.class).getResultList();
     }
 
     @Override
@@ -49,7 +52,7 @@ public class UserDaoImpl implements UserDao {
             set.add(1);
             user.setRoles(roleService.getRolesByIds(set));
         }
-        user.setPassword(passwordEncoder().encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         entityManager.persist(user);
     }
 
@@ -66,21 +69,25 @@ public class UserDaoImpl implements UserDao {
                 user.setRoles(selectedRole);
             }
             if (!userDetails.getPassword().isEmpty()) {
-                user.setPassword(passwordEncoder().encode(userDetails.getPassword()));
+                user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
             }
         } else {
-            throw new RuntimeException("Пользователь с таким id не найден");
+            throw new EntityNotFoundException("Пользователь с таким id не найден");
         }
     }
 
     @Override
     public void deleteUserById(int id) {
-        entityManager.remove(entityManager.find(User.class, id));
+        User user = entityManager.find(User.class, id);
+        if (user == null) {
+            throw new EntityNotFoundException("Пользователь с таким id не найден");
+        }
+        entityManager.remove(user);
     }
 
     @Override
     public Optional<User> getUserByName(String username) {
-        String query = "SELECT users FROM User users WHERE users.username = :username";
+        String query = "SELECT users FROM User users JOIN FETCH users.roles WHERE users.username = :username";
         try {
             User user = entityManager.createQuery(query, User.class)
                     .setParameter("username", username)
@@ -93,6 +100,10 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public User getUserById(int id) {
-        return entityManager.find(User.class, id);
+        User user = entityManager.find(User.class, id);
+        if (user == null) {
+            throw new EntityNotFoundException("Пользователь с таким id не найден");
+        }
+        return user;
     }
 }
