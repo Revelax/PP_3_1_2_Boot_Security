@@ -50,13 +50,15 @@ public class AdminController {
 
     @PatchMapping("/edit/{id}")
     public String update(@PathVariable("id") int id, @ModelAttribute("editUser") @Valid User updateUser, BindingResult bindingResult,
-                         @RequestParam(value = "roles", required = false) Set<Integer> roleIds) {
+                         @RequestParam(value = "roles", required = false) Set<Integer> roleIds, Model model) {
         User user = userService.getUserById(id);
         if (!user.getUsername().equals(updateUser.getUsername())) {
             userValidator.validate(updateUser, bindingResult);
         }
-        if (bindingResult.hasErrors())
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("roles", roleService.getAllRoles());
             return "/admin/edit";
+        }
 
         userService.editUserAndHisRoles(id, updateUser, roleIds);
         return "redirect:/admin";

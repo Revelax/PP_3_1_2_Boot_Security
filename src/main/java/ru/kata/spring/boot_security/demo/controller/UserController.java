@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import javax.persistence.EntityNotFoundException;
 import java.security.Principal;
 
 @Controller
@@ -19,7 +20,7 @@ public class UserController {
 
     @GetMapping("/user")
     public String sayHello(Model model, Principal principal) {
-        User user = userService.getUserByName(principal.getName()).orElse(null);
+        User user = userService.getUserByName(principal.getName()).orElseThrow(EntityNotFoundException::new);
 
         model.addAttribute("user", user);
         return "/hello/index";
